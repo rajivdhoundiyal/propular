@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -42,10 +43,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @SpringBootApplication
 public class PropularApplication  extends WebMvcConfigurerAdapter {
 
-	
-	
 	public static void main(String[] args) {
-		//System.out.println(new UserDetailsSecurityConfig().passwordEncoder().encode(arg0)code("YWNtZTphY21lc2VjcmV0"));
 		SpringApplication.run(PropularApplication.class, args);
 	}
 	
@@ -54,6 +52,12 @@ public class PropularApplication  extends WebMvcConfigurerAdapter {
 
 		@Autowired
 		AppUserDetailsService userDetailsService;
+		
+		@Override
+		protected void configure(HttpSecurity http) throws Exception {
+			http.requestMatchers().antMatchers("/**").and().authorizeRequests()
+			.antMatchers("/**").permitAll(); 
+		}
 
 		@Override
 		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
