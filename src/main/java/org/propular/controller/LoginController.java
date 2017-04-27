@@ -1,12 +1,13 @@
 package org.propular.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class LoginController {
 
-	public String login() {
-		return "index";
+	@GetMapping("/")
+	public String home() {
+		return "home";
 	}
-	
 }
