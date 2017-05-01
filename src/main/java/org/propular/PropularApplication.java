@@ -2,6 +2,7 @@ package org.propular;
 
 import java.security.KeyPair;
 
+import org.propular.constants.PropularConstants;
 import org.propular.dto.security.AppClient;
 import org.propular.dto.security.AppUser;
 import org.propular.service.dao.AppClientsRepository;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -31,8 +31,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.ClientRegistrationException;
@@ -51,25 +54,24 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 	}
 
 	@Configuration
-	@Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
-	protected static class UserDetailsSecurityConfig extends
-			WebSecurityConfigurerAdapter {
+	@Order(2)
+	protected static class UserDetailsSecurityConfig extends WebSecurityConfigurerAdapter {
 
 		@Autowired
 		AppUserDetailsService userDetailsService;
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
-			http.authorizeRequests().antMatchers("/css/**").permitAll().anyRequest()
-			.fullyAuthenticated().and().formLogin().loginPage("/login")
-			.failureUrl("/login?error").permitAll().and().logout().permitAll();
+			http.authorizeRequests().antMatchers("/resources/**").permitAll().antMatchers("/api/**").permitAll().anyRequest().authenticated().and()
+					.formLogin().loginPage("/login").failureUrl("/login?error").permitAll().and().logout().permitAll();
+
+			http.csrf().disable();
+			// .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
 		}
 
 		@Override
-		protected void configure(AuthenticationManagerBuilder auth)
-				throws Exception {
-			auth.userDetailsService(userDetailsService).passwordEncoder(
-					passwordEncoder());
+		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+			auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
 		}
 
 		@Bean
@@ -81,9 +83,42 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 	}
 
 	@Configuration
+	@EnableResourceServer
+	public class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
+		
+		@Override
+		public void configure(HttpSecurity http) throws Exception {
+			http.authorizeRequests().antMatchers("/api/**").access(PropularConstants.OAUTH_ROLE_READ);
+		}
+		
+		@Override
+		public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+			resources.resourceId("openid");
+		}
+		
+	}
+	
+	/*@Configuration
+	@EnableResourceServer
+	@EnableGlobalMethodSecurity(order=3, prePostEnabled = true, proxyTargetClass=true)
+	public class OAuth2ResourceServerConfig extends GlobalMethodSecurityConfiguration {
+
+		@Override
+		protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+			super.configure(auth);
+		}
+		
+		@Override
+		protected MethodSecurityExpressionHandler createExpressionHandler() {
+			return new OAuth2MethodSecurityExpressionHandler();
+		}
+		
+		
+	}*/
+
+	@Configuration
 	@EnableAuthorizationServer
-	protected static class OAuth2Config extends
-			AuthorizationServerConfigurerAdapter {
+	protected static class OAuth2Config extends AuthorizationServerConfigurerAdapter {
 
 		@Autowired
 		private AuthenticationManager authenticationManager;
@@ -104,50 +139,41 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 		private String jksKeypair;
 
 		@Bean
-		public JwtAccessTokenConverter jwtAccessTokenConverter()
-				throws Exception {
+		public JwtAccessTokenConverter jwtAccessTokenConverter() throws Exception {
 			JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-			KeyPair keyPair = new KeyStoreKeyFactory(
-					PropularApplication.getResource(jksPath),
+			KeyPair keyPair = new KeyStoreKeyFactory(PropularApplication.getResource(jksPath),
 					jksPassword.toCharArray()).getKeyPair(jksKeypair);
 			converter.setKeyPair(keyPair);
 			return converter;
 		}
 
 		@Override
-		public void configure(ClientDetailsServiceConfigurer clients)
-				throws Exception {
+		public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 			clients.withClientDetails(appClientsUserDetailsService);
 		}
 
 		@Override
-		public void configure(AuthorizationServerEndpointsConfigurer endpoints)
-				throws Exception {
-			endpoints.authenticationManager(authenticationManager)
-					.userDetailsService(userDetailsService)
+		public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+			endpoints.authenticationManager(authenticationManager).userDetailsService(userDetailsService)
 					.accessTokenConverter(jwtAccessTokenConverter());
 		}
 
 		@Override
-		public void configure(AuthorizationServerSecurityConfigurer oauthServer)
-				throws Exception {
-			oauthServer.tokenKeyAccess("permitAll()")
-					.checkTokenAccess("isAuthenticated()")
+		public void configure(AuthorizationServerSecurityConfigurer oauthServer) throws Exception {
+			oauthServer.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()")
 					.passwordEncoder(new BCryptPasswordEncoder());
 		}
 
 	}
 
 	@Service
-	protected static class AppClientsUserDetailsService implements
-			ClientDetailsService {
+	protected static class AppClientsUserDetailsService implements ClientDetailsService {
 
 		@Autowired
 		AppClientsRepository appClientsRepository;
 
 		@Override
-		public ClientDetails loadClientByClientId(String clientId)
-				throws ClientRegistrationException {
+		public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
 			AppClient client = appClientsRepository.findByClientId(clientId);
 			BaseClientDetails clientDetails = new BaseClientDetails();
 			clientDetails.setClientId(client.clientId);
@@ -166,15 +192,13 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 		private AppUsersRepository userRepository;
 
 		@Override
-		public UserDetails loadUserByUsername(String username)
-				throws UsernameNotFoundException {
+		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 			AppUser user = userRepository.findByUserName(username);
 			if (user == null) {
 				throw new UsernameNotFoundException(username);
 			} else {
-				UserDetails details = new org.springframework.security.core.userdetails.User(
-						user.userName, user.password, true, true, true, true,
-						user.getRoles());
+				UserDetails details = new org.springframework.security.core.userdetails.User(user.userName,
+						user.password, true, true, true, true, user.getRoles());
 				return details;
 			}
 		}
@@ -194,11 +218,11 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/login").setViewName("login");
-        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+		registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
 	}
 
 }

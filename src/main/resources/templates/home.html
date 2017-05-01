@@ -1,13 +1,205 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="propular">
 <head>
 <meta charset="UTF-8"></meta>
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+	integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+	crossorigin="anonymous"></link>
 <title>Propular:: Home</title>
 </head>
 <body>
-<div>Search: <input type="text"></input><input type="button" value="Search"></input></div>
-<div>Projects
+	<div class="container-fluid">
+		<div>
+			Search: <input type="text"></input><input type="button"
+				value="Search"></input>
+		</div>
+		<div ng-controller="projectController">
+			<div class="collapse" id="collapseExample">
+				<div class="card card-block"></div>
+			</div>
 
-</div>
+			<div id="accordion" role="tablist" aria-multiselectable="true">
+				<div class="card">
+					<div id="collapseProjectList" class="collapse show" role="tabpanel"
+						aria-labelledby="headingOne" data-ng-init="getProjects()">
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Id</th>
+									<th>Name</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="project in projects">
+									<td scope="row"><input type="checkbox"
+										ng-click="addForDelete(project)"></input></td>
+									<td><a href="" data-toggle="collapse"
+										data-target="#collapseProjectDetails" data-parent="#accordion"
+										aria-controls="collapseExample" aria-expanded="false"
+										ng-click="viewProjectDetail(project)">{{project.projectId}}</a></td>
+									<td>{{project.name}}</td>
+									<td>{{project.description}}</td>
+								</tr>
+							</tbody>
+						</table>
+						<form class="form-inline">
+							<div class="form-group">
+								<button class="btn btn-primary btn-sm" type="button"
+									data-toggle="collapse" data-target="#collapseOne"
+									data-parent="#accordion" aria-expanded="false"
+									aria-controls="collapseExample" ng-click="viewProjectDetail()">New</button>
+							</div>
+							<div class="form-group mx-sm-1">
+								<button class="btn btn-danger btn-sm" type="button"
+									data-toggle="collapse" data-target="#collapseOne"
+									data-parent="#accordion" aria-expanded="false"
+									aria-controls="collapseExample" ng-click="deleteProjects()">Delete</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div class="card">
+					<div id="collapseOne" class="collapse hide" role="tabpanel"
+						aria-labelledby="headingOne">
+						<button class="btn btn-primary btn-sm" type="button"
+							data-toggle="collapse" data-target="#collapseProjectList"
+							data-parent="#accordion" aria-expanded="false"
+							aria-controls="collapseExample">Back</button>
+						<form action="#">
+							<div class="form-group">
+								<input type="text" class="form-control" id="projectName"
+									ng-model="project.name" placeholder="Project Name"></input>
+							</div>
+							<div class="form-group">
+								<input type="text" class="form-control" id="projectDescription"
+									ng-model="project.description"
+									placeholder="Project Description"></input>
+							</div>
+							<div class="form-group">
+								<button class="btn btn-primary btn-sm" type="button"
+									data-toggle="collapse" data-target="#collapseProjectList"
+									data-parent="#accordion" aria-controls="collapseExample"
+									aria-expanded="false" ng-click="createProject()">Submit</button>
+								<button class="btn btn-primary btn-sm" type="button"
+								data-toggle="collapse" data-target="#collapseProjectProperty"
+								data-parent="#accordion" aria-controls="collapseExample"
+								aria-expanded="false">Add Property Group</button>
+							</div>
+						</form>
+					</div>
+				</div>
+				
+				<div class="card" ng-controller="propertyGroupController">
+					<div id="collapseProjectDetails" class="collapse hide"
+						role="tabpanel" aria-labelledby="headingOne">
+						<button class="btn btn-primary btn-sm" type="button"
+							data-toggle="collapse" data-target="#collapseProjectList"
+							data-parent="#accordion" aria-expanded="false"
+							aria-controls="collapseExample">Back</button>
+						<div>{{projectDetail.name}}</div>
+						<table class="table table-striped">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Id</th>
+									<th>Name</th>
+									<th>Description</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-repeat="group in projectDetail.propertyGroup">
+									<td scope="row"><input type="checkbox"
+										ng-click="addForDelete(project)"></input></td>
+									<td><a href="" data-toggle="collapse"
+										data-target="#collapseProjectDetails" data-parent="#accordion"
+										aria-controls="collapseExample" aria-expanded="false"
+										ng-click="viewProjectDetail(group)">{{group.propertyGroupId}}</a></td>
+									<td><a href="" data-toggle="collapse"
+										data-target="#collapseProjectProperty"
+										data-parent="#accordion" aria-controls="collapseExample"
+										aria-expanded="false" ng-click="viewPropertyGroup(group)">{{group.propertyGroupName}}</a></td>
+									<td>{{group.description}}</td>
+								</tr>
+							</tbody>
+						</table>
+						<div class="form-group">
+							<button class="btn btn-primary btn-sm" type="button"
+								data-toggle="collapse" data-target="#collapseProjectProperty"
+								data-parent="#accordion" aria-controls="collapseExample"
+								aria-expanded="false">Add Property Group</button>
+						</div>
+					</div>
+
+					<div id="accordion" role="tablist" aria-multiselectable="true">
+						<div class="card">
+							<div id="collapseProjectProperty" class="collapse hide"
+								role="tabpanel" aria-labelledby="headingOne">
+								<button class="btn btn-primary btn-sm" type="button"
+									data-toggle="collapse" data-target="#collapseProjectDetails"
+									data-parent="#accordion" aria-expanded="false"
+									aria-controls="collapseExample">Back</button>
+								<div class="form-group">
+									<input type="text" class="form-control" id="propertyGroupName"
+										ng-model="propertyGroup.propertyGroupName"
+										placeholder="Property Group Name"></input>
+								</div>
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>#</th>
+											<th>Key</th>
+											<th>Value</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr ng-repeat="prop in propertyGroup.properties">
+											<td scope="row"><input type="checkbox"
+												ng-click="addForDelete(prop)"></input></td>
+											<td>{{prop.key}}</td>
+											<td>{{prop.value}}</td>
+										</tr>
+										<tr>
+											<td scope="row"></td>
+											<td><input type="text" class="form-control"
+												id="propertyKey" ng-model="property.key" placeholder="Key"></input></td>
+											<td><input type="text" class="form-control"
+												id="propertyValue" ng-model="property.value"
+												placeholder="Value"></input></td>
+										</tr>
+									</tbody>
+								</table>
+								<div class="form-group">
+									<button class="btn btn-secondary btn-sm" type="button"
+										ng-click="addProperty()">+</button>
+									<button class="btn btn-success btn-sm" type="button"
+										data-toggle="collapse" data-target="#collapseProjectDetails"
+										data-parent="#accordion" aria-controls="collapseExample"
+										aria-expanded="false"
+										ng-click="savePropertyGroup(projectDetail)">Save</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+	integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+	crossorigin="anonymous"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+	integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+	crossorigin="anonymous"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+	integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+	crossorigin="anonymous"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+<script src="js/app.js" type="text/javascript" crossorigin="anonymous"></script>
 </html>

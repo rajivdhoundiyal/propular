@@ -3,19 +3,26 @@ package org.propular.dto;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "project")
 public class Project {
+	
+	public static final String ID = "id";
 
 	@Id
 	@Field("id")
 	private String projectId;
 
+	@Field("name")
+	private String name;
+
 	@Field("description")
 	private String description;
 
+	@DBRef
 	private List<PropertyGroup> propertyGroup;
 
 	public String getProjectId() {
@@ -40,6 +47,20 @@ public class Project {
 
 	public void setPropertyGroup(List<PropertyGroup> propertyGroup) {
 		this.propertyGroup = propertyGroup;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public String toString() {
+		return "Project [projectId=" + projectId + ", name=" + name + ", description=" + description
+				+ ", propertyGroup=" + propertyGroup + "]";
 	}
 
 }
