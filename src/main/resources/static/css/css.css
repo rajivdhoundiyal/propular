@@ -1,0 +1,22 @@
+.card-header {
+    padding: .0rem 0.5rem;
+}
+
+.h6 h6 {
+    display: inline-block;
+    vertical-align: baseline;
+    float: none;
+}
+
+.form-inline {
+	vertical-align: middle;
+}
+
+.breadcrumb {
+	background-color: white;
+	margin-top: 0.5em;
+	margin-bottom: inherit;
+}
+.card-footer {
+	padding: 0.5rem 0.5rem;
+}

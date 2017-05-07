@@ -2,10 +2,13 @@ package org.propular.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.propular.dto.Project;
 import org.propular.service.dao.ProjectRepository;
 import org.propular.service.dao.PropertyGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +26,7 @@ public class ProjectController {
 	private PropertyGroupRepository propertyGroupRepository;
 	
 	@RequestMapping(value="/project", method=RequestMethod.POST)
-	public @ResponseBody List<Project> saveProject(@RequestBody Project project) {
+	public @ResponseBody List<Project> saveProject(@RequestBody @Valid Project project) {
 		project.setPropertyGroup(propertyGroupRepository.save(project.getPropertyGroup()));
 		projectRepository.save(project);
 		return projectRepository.findAll();
