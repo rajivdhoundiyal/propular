@@ -27,7 +27,9 @@ public class ProjectController {
 	
 	@RequestMapping(value="/project", method=RequestMethod.POST)
 	public @ResponseBody List<Project> saveProject(@RequestBody @Valid Project project) {
-		project.setPropertyGroup(propertyGroupRepository.save(project.getPropertyGroup()));
+		if (project.getPropertyGroup() != null && !project.getPropertyGroup().isEmpty()) {
+			project.setPropertyGroup(propertyGroupRepository.save(project.getPropertyGroup()));
+		}
 		projectRepository.save(project);
 		return projectRepository.findAll();
 	}

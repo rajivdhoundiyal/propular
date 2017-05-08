@@ -122,7 +122,7 @@ app.controller('projectController', function($scope, $http, notificationService)
 			data : $scope.project
 		}).then(function mySucces(response) {
 			$scope.projects = response.data;
-			$scope.$digest();
+			//$scope.$digest();
 		}, function myError(response) {
 			console.log(response);
 			$scope.error = response.statusText;
@@ -217,7 +217,7 @@ app.controller('propertyGroupController', function($scope, $http) {
 			$scope.propertyGroup.properties.push($scope.property);
 		}
 		$scope.property = {};
-		$scope.$digest();
+		//$scope.$digest();
 	};
 
 	$scope.savePropertyGroup = function(projectDetail) {
@@ -239,7 +239,7 @@ app.controller('propertyGroupController', function($scope, $http) {
 			data : projectDetail
 		}).then(function mySucces(response) {
 			$scope.projects = response.data;
-			$scope.$digest();
+			//$scope.$digest();
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		})
