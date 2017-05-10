@@ -1,5 +1,22 @@
 var app = angular.module('propular', []);
 
+app.filter('formatProjectId' , formatProjectId)
+
+function formatProjectId() {
+
+ return function(input,prefix) {
+     if(!input) return;
+
+      if(input.length > 11)
+         return prefix + '-' + input.toUpperCase().substr(10,25);
+     else
+         return prefix + '-' + input;
+
+ }
+
+
+}
+
 app.factory('notificationService', function($rootScope) {
     var notificationService = {
     	message: '',
@@ -36,10 +53,6 @@ app.directive('notification', ['$interval', function ($interval) {
 	        		} else {
 	        			$scope.alertData.push(notificationService);
 	        		}
-	        		/*$scope.alertData.message = notificationService.message;
-	        		$scope.alertData.show = notificationService.show;
-	        		$scope.alertData.status = notificationService.status;
-	        		$scope.alertData.type = notificationService.type;*/
             });
         },
         template:"<div class='container-fluid'><div ng-repeat='alert in alertData'><div class='alert alert-{{alert.type}} alert-dismissible fade show' ng-show='alert.show' " +
@@ -135,19 +148,19 @@ app.controller('projectController', function($scope, $http, notificationService)
 
 	$scope.viewProjectDetail = function(project) {
 		$scope.projectDetail = project;
-		/*$http({
+		$http({
 			method : "GET",
-			url : "/project/"+id
+			url : "/"+project.projectId+"/propertygroup"
 		}).then(function mySucces(response) {
-			$scope.success = response.data;
+			$scope.propertyGroup = response.data;
 		}, function myError(response) {
 			$scope.error = response.statusText;
-		})*/
+		})
 	};
 
 });
 
-app.controller('propertyGroupController', function($scope, $http) {
+app.controller('propertyGroupController', function($scope, $http, notificationService) {
 	$scope.propertyGroup = {
 		propertyGroupName : "",
 		propertyGroupDescription : "",
@@ -165,7 +178,7 @@ app.controller('propertyGroupController', function($scope, $http) {
 	
 	$scope.viewPropertyGroup = function(propertyGroup) {
 		$scope.propertyGroup = propertyGroup;
-		$scope.property = $scope.propertyGroup.properties;
+		$scope.properties = $scope.propertyGroup.properties;
 		//$scope.$apply();
 	};
 
@@ -248,5 +261,104 @@ app.controller('propertyGroupController', function($scope, $http) {
 		$scope.property = {};
 		//$scope.$digest();
 	};
+	
+	$scope.deleteProperties = function(event) {
+		
+		if($scope.propsToDelete == null || ($scope.propsToDelete.length == 0)) {
+			notificationService.prepForBroadcast("Please choose the properties to delete.","show", "danger", true);
+			event.stopPropagation();
+			return;
+		}
+		
+		angular.forEach($scope.propsToDelete, function(item) {
+			$scope.properties.splice(item, 1);
+		});
+		
+	}
 
 });
+
+app.controller('environmentController', function($scope, $http, notificationService) {
+	
+	$scope.environmentAriaFlag = true;
+	
+	$scope.environment = {
+		name : "",
+		description : "",
+	};
+
+	$scope.environmentsToDelete = [];
+	
+	$scope.getEnvironments = function() {
+		$http({
+			method : "GET",
+			url : "/environment"
+		}).then(function mySucces(response) {
+			$scope.environments = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+	};
+	
+	$scope.addEnvironmentForDelete = function(environment) {
+		var index = $scope.environmentsToDelete.indexOf(environment);
+		if (index > -1) {
+			$scope.environmentsToDelete.splice(environment, 1);
+		} else {
+			$scope.environmentsToDelete.push(environment);
+		}
+	}
+	
+	$scope.addAllEnvironmentForDelete = function(allEnvDelCheck) {
+		angular.forEach($scope.environments, function (item) {
+            item.checked = allEnvDelCheck;
+            $scope.addEnvironmentForDelete(item);
+        });
+		
+		if(!allEnvDelCheck) {
+			$scope.addEnvironmentForDelete = [];
+		}
+	}
+	
+	$scope.saveEnvironment = function(event) {
+		var regexp = '^[a-zA-Z]*$';
+		if($scope.environment.name == null || $scope.environment.name == '') {
+			notificationService.prepForBroadcast("Please correct environment name, it should not be empty or have special characters.","show", "danger", true);
+			event.stopPropagation();
+			return;
+		}
+		
+		$scope.environmentAriaFlag = true;
+		
+		$http({
+			method : "POST",
+			url : "/environment",
+			data : $scope.environment
+		}).then(function mySucces(response) {
+			$scope.environments = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+
+	$scope.deleteEnvironments = function(event) {
+		
+		if($scope.environmentsToDelete == null || $scope.environmentsToDelete.length <= 0) {
+			notificationService.prepForBroadcast("Please select environment to delete first.","show", "danger", true);
+			event.stopPropagation();
+		}
+		
+		$http({
+			method : "PATCH",
+			url : "/environment",
+			data : $scope.environmentsToDelete
+		}).then(function mySucces(response) {
+			$scope.environments = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+});
+

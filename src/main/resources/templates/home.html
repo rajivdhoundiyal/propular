@@ -15,39 +15,44 @@
 				aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<a class="navbar-brand" href="#">Propular</a>
+			<a class="navbar-brand" href="#">Propeller</a>
 
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav mr-auto">
-					<li class="nav-item active"><a class="nav-link" href="#">Project<span
+					<li class="nav-item active"><a class="nav-link" href="#" data-toggle="collapse" data-target="#collapseProjectList"
+								data-parent="#accordion" aria-expanded="false"
+								aria-controls="collapseExample">Project<span
 							class="sr-only">(current)</span>
 					</a></li>
-					<li class="nav-item"><a class="nav-link" href="#">User</a></li>
-					<li class="nav-item"><a class="nav-link" href="#"  data-toggle="collapse"
-									data-target="#collapseEnvironment" data-parent="#accordion"
-									aria-controls="collapseExample" aria-expanded="false">Environment</a>
-					</li>
+					<li class="nav-item" ng-controller="environmentController"><a class="nav-link" href="#"
+						data-toggle="collapse" data-target="#collapseEnvironment"
+						data-parent="#accordion" aria-controls="collapseExample"
+						aria-expanded="false">Environment</a></li>
+						 
 				</ul>
-				<div class="navbar-right pull-left">
-					<form class="form-inline my-2 my-lg-0">
+				<ul class="navbar-nav nav-right">
+					<li class="nav-item dropdown active"><a
+						class="nav-link dropdown-toggle" href="http://example.com"
+						id="navbarDropdownMenuLink" data-toggle="dropdown"
+						aria-haspopup="true" aria-expanded="false"> User Management </a>
+						<div class="dropdown-menu"
+							aria-labelledby="navbarDropdownMenuLink">
+							<a class="dropdown-item" href="#">User</a> <a
+								class="dropdown-item" href="#">Role</a>
+						</div></li>
+					<li class="nav-item">
 						<div class="input-group input-group-sm">
 							<input type="text" class="form-control" placeholder="Search"></input><span
 								class="input-group-btn">
 								<button class="btn btn-warning btn-sm" type="button">Search</button>
 							</span>
 						</div>
-					</form>
-				</div>
+					</li>
+				</ul>
 			</div>
 		</nav>
 	</div>
 	<div class="container-fluid" ng-controller="projectController">
-		<!-- <div class="row" ng-controller="projectController">
-			<div class="container-fluid"> -->
-		<!-- <div class="collapse" id="collapseExample">
-						<div class="card card-block"></div>
-					</div> -->
-
 		<div id="accordion" role="tablist" aria-multiselectable="true">
 			<div class="card">
 				<div id="collapseProjectList" class="collapse show" role="tabpanel"
@@ -59,26 +64,29 @@
 							</nav>
 						</div>
 					</div>
-					<table class="table table-striped table-hover">
+					<table class="table table-hover table-bordered ">
 						<thead class="thead-default">
 							<tr>
-								<th ng-click="$event.stopPropagation()"><input type="checkbox"
-									ng-click="addAllProjectsDelete(allProjectDelCheck)" ng-model="allProjectDelCheck"></input></th>
+								<th ng-click="$event.stopPropagation()"><input
+									type="checkbox"
+									ng-click="addAllProjectsDelete(allProjectDelCheck)"
+									ng-model="allProjectDelCheck"></input></th>
+								<th>Project Id</th>
 								<th>Name</th>
 								<th>Description</th>
-								<th>Id</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr ng-repeat="project in projects" data-toggle="collapse"
-									data-target="#collapseProjectDetails" data-parent="#accordion"
-									aria-controls="collapseExample" aria-expanded="false"
-									ng-click="viewProjectDetail(project)">
-								<td scope="row" ng-click="$event.stopPropagation()"><input id="projectDeleteAll" type="checkbox"
+								data-target="#collapseProjectDetails" data-parent="#accordion"
+								aria-controls="collapseExample" aria-expanded="false"
+								ng-click="viewProjectDetail(project)">
+								<td scope="row" ng-click="$event.stopPropagation()"><input
+									id="projectDeleteAll" type="checkbox"
 									ng-click="addForDelete(project)" ng-model="project.checked"></input></td>
+								<td>{{project.projectId | formatProjectId:'PROJ'}}</td>
 								<td>{{project.name}}</td>
 								<td>{{project.description}}</td>
-								<td>{{project.projectId}}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -149,26 +157,28 @@
 							</nav>
 						</div>
 					</div>
-					<table class="table table-striped table-hover">
+					<table class="table table-bordered table-hover">
 						<thead class="thead-default">
 							<tr>
 								<th><input type="checkbox"
-									ng-click="addAllGroupsDelete(projectDetail, allGroupsDelCheck)" ng-model="allGroupsDelCheck"></input></th>
+									ng-click="addAllGroupsDelete(projectDetail, allGroupsDelCheck)"
+									ng-model="allGroupsDelCheck"></input></th>
+								<th>Property Group Id</th>
 								<th>Name</th>
 								<th>Description</th>
-								<th>Id</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr ng-repeat="group in projectDetail.propertyGroup" data-toggle="collapse"
-									data-target="#collapseProjectProperty" data-parent="#accordion"
-									aria-controls="collapseExample" aria-expanded="false"
-									ng-click="viewPropertyGroup(group)">
-								<td scope="row" ng-click="$event.stopPropagation()"><input type="checkbox"
-									ng-click="addGroupForDelete(group)" ng-model="group.checked"></input></td>
+							<tr ng-repeat="group in propertyGroup"
+								data-toggle="collapse" data-target="#collapseProjectProperty"
+								data-parent="#accordion" aria-controls="collapseExample"
+								aria-expanded="false" ng-click="viewPropertyGroup(group)">
+								<td scope="row" ng-click="$event.stopPropagation()"><input
+									type="checkbox" ng-click="addGroupForDelete(group)"
+									ng-model="group.checked"></input></td>
+								<td>{{group.propertyGroupId | formatProjectId:'GROUP'}}</td>
 								<td>{{group.propertyGroupName}}</td>
 								<td>{{group.description}}</td>
-								<td>{{group.propertyGroupId}}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -178,6 +188,7 @@
 							data-toggle="collapse" data-target="#collapseProjectProperty"
 							data-parent="#accordion" aria-controls="collapseExample"
 							aria-expanded="false">Add Property Group</button>
+						<button ng-if="groupsToDelete.length == 1" class="btn btn-warning btn-sm" type="button">Security Token</button>
 						<!-- </div> -->
 					</div>
 				</div>
@@ -193,22 +204,36 @@
 									aria-controls="collapseExample">&lt;</button>
 								<nav class="breadcrumb default">
 									<h6 class="breadcrumb-item active">{{projectDetail.name}}</h6>
-									<h6 class="breadcrumb-item active">{{propertyGroup.propertyGroupName}}</h6>
+									<h6 ng-if="propertyGroup.propertyGroupName.trim() != ''"  class="breadcrumb-item active">{{propertyGroup.propertyGroupName}}</h6>
 									<h6 class="breadcrumb-item active">Properties</h6>
 								</nav>
 							</div>
 							<div class="form-group">
 								<input type="text" class="form-control" id="propertyGroupName"
-									ng-model="propertyGroup.propertyGroupName" placeholder="Properrty Group Name"></input>
+									ng-model="propertyGroup.propertyGroupName"
+									placeholder="Property Group Name"></input>
 							</div>
-							<table class="table table-striped">
+							<table class="table table-bordered">
 								<thead class="thead-default">
 									<tr>
 										<th><input type="checkbox"
 											ng-click="addAllPropertyDelete(propertyGroup, allPropDelCheck)"
 											ng-model="allPropDelCheck"></input></th>
 										<th>Key</th>
-										<th>Value</th>
+										<th ng-controller="environmentController">
+										<div class="form-inline">
+										<text>Environment&nbsp;</text>
+											<div class="dropdown active" data-ng-init="getEnvironments()">
+											<text
+												class="dropdown-toggle" href="http://example.com"
+												id="envDropdownMenuLink" data-toggle="dropdown"
+												aria-haspopup="true" aria-expanded="false">{{environments[0].name}}</text>
+												<div class="dropdown-menu"
+													aria-labelledby="envDropdownMenuLink">
+													<a class="dropdown-item" href="#"
+														ng-repeat="env in environments">{{env.name}}</a>
+												</div></div></div>
+										</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -232,20 +257,27 @@
 								<!-- <div class="form-group"> -->
 								<button class="btn btn-secondary btn-sm" type="button"
 									ng-click="addProperty()">+</button>
+									<button class="btn btn-danger btn-sm" type="button"
+									ng-click="deleteProperties($event)">-</button>
 								<button class="btn btn-success btn-sm" type="button"
 									data-toggle="collapse" data-target="#collapseProjectDetails"
 									data-parent="#accordion" aria-controls="collapseExample"
 									aria-expanded="false"
 									ng-click="savePropertyGroup(projectDetail)">Save</button>
+								<button class="btn btn-warning btn-sm" type="button"
+									data-toggle="collapse" data-target="#collapseProjectDetails"
+									data-parent="#accordion" aria-controls="collapseExample"
+									aria-expanded="false"
+									ng-click="savePropertyGroup(projectDetail)">Security Token</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			
-			<div class="card">
+
+			<div class="card" ng-controller="environmentController">
 				<div id="collapseEnvironment" class="collapse hide" role="tabpanel"
-					aria-labelledby="headingOne">
+					aria-labelledby="headingOne" ng-init="getEnvironments()">
 					<div class="card-header">
 						<div class="form-inline">
 							<button class="btn btn-primary btn-sm" type="button"
@@ -261,26 +293,49 @@
 					<form action="#">
 						<div class="form-group">
 							<input type="text" class="form-control" id="environmentName"
-								ng-model="environment.name" placeholder="Environment Name"></input>
+								ng-model="environment.name" ng-pattern="/^[a-zA-Z]*$/" placeholder="Environment Name"></input>
 						</div>
 						<div class="form-group">
-							<input type="text" class="form-control" id="environmentDescription"
-								ng-model="environment.description" placeholder="Environment Description"></input>
+							<input type="text" class="form-control"
+								id="environmentDescription" ng-model="environment.description"
+								placeholder="Environment Description"></input>
 						</div>
 						<div class="card-footer">
 							<button class="btn btn-primary btn-sm" type="button"
-								data-toggle="collapse" data-target="#collapseProjectList"
-								data-parent="#accordion" aria-controls="collapseExample"
-								aria-expanded="false" ng-click="createProject()">Submit</button>
-							<button class="btn btn-primary btn-sm" type="button"
-								data-toggle="collapse" data-target="#collapseEnvironment"
-								data-parent="#accordion" aria-controls="collapseExample"
-								aria-expanded="false">Add Environment</button>
+								ng-click="saveEnvironment($event)">Add Environment</button>
+								<button class="btn btn-primary btn-sm" type="button"
+								ng-click="deleteEnvironments($event)">Delete</button>
 						</div>
 					</form>
+					<table class="table table-striped table-hover">
+						<thead class="thead-default">
+							<tr>
+								<th ng-click="$event.stopPropagation()"><input
+									type="checkbox"
+									ng-click="addAllEnvironmentForDelete(allProjectDelCheck)"
+									ng-model="allProjectDelCheck"></input></th>
+								<th>Name</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+						
+							<tr ng-if="environments == null || environments.length &lt;= 0">
+								<td class="row"></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr ng-repeat="environment in environments">
+								<td scope="row" ng-click="$event.stopPropagation()"><input
+									id="environmentDeleteAll" type="checkbox"
+									ng-click="addEnvironmentForDelete(environment)" ng-model="environment.checked"></input></td>
+								<td>{{environment.name}}</td>
+								<td>{{environment.description}}</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
-			
 		</div>
 	</div>
 </body>

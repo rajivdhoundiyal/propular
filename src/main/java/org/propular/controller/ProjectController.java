@@ -1,5 +1,6 @@
 package org.propular.controller;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -7,8 +8,9 @@ import javax.validation.Valid;
 import org.propular.dto.Project;
 import org.propular.service.dao.ProjectRepository;
 import org.propular.service.dao.PropertyGroupRepository;
+import org.propular.util.MappingUtility;
+import org.propular.vo.ProjectVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,30 +25,34 @@ public class ProjectController {
 	private ProjectRepository projectRepository;
 	
 	@Autowired
+	MappingUtility<ProjectVO, Project> mappingUtility; 
+	
+	
+	@Autowired
 	private PropertyGroupRepository propertyGroupRepository;
 	
 	@RequestMapping(value="/project", method=RequestMethod.POST)
-	public @ResponseBody List<Project> saveProject(@RequestBody @Valid Project project) {
+	public @ResponseBody Collection<ProjectVO> saveProject(@RequestBody @Valid Project project) {
 		if (project.getPropertyGroup() != null && !project.getPropertyGroup().isEmpty()) {
 			project.setPropertyGroup(propertyGroupRepository.save(project.getPropertyGroup()));
 		}
 		projectRepository.save(project);
-		return projectRepository.findAll();
+		return mappingUtility.convertToVO(projectRepository.findAll(), ProjectVO.class);
 	}
 	
 	@RequestMapping(value="/project", method=RequestMethod.GET)
-	public @ResponseBody List<Project> getProjects() {
-		return projectRepository.findAll();
+	public @ResponseBody Collection<ProjectVO> getProjects() {
+		return mappingUtility.convertToVO(projectRepository.findAll(), ProjectVO.class);
 	}
 	
 	@RequestMapping(value="/project/{id}", method=RequestMethod.GET)
-	public @ResponseBody Project getProjectDetail(@PathVariable("id") String id) {
-		return projectRepository.findByProjectId(id);
+	public @ResponseBody ProjectVO getProjectDetail(@PathVariable("id") String id) {
+		return mappingUtility.convertToVO(projectRepository.findByProjectId(id), ProjectVO.class) ;
 	}
 	
 	@RequestMapping(value="/project", method=RequestMethod.PATCH)
-	public @ResponseBody List<Project> deleteProjects(@RequestBody List<Project> projects) {
+	public @ResponseBody Collection<ProjectVO> deleteProjects(@RequestBody List<Project> projects) {
 		projectRepository.delete(projects);
-		return projectRepository.findAll();
+		return mappingUtility.convertToVO(projectRepository.findAll(), ProjectVO.class);
 	}
 }

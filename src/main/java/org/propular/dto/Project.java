@@ -21,14 +21,12 @@ public class Project {
 	private String projectId;
 
 	@Field("name")
-	@NotBlank(message="Please enter valid project name.")
-	@NotEmpty(message="Please enter valid project name.")
 	private String name;
 
 	@Field("description")
 	private String description;
 
-	@DBRef
+	@DBRef(lazy=true)
 	private List<PropertyGroup> propertyGroup;
 
 	public String getProjectId() {

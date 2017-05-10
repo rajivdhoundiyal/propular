@@ -18,7 +18,8 @@ public class PropertyGroup {
 	@Field("propertygroupname")
 	private String propertyGroupName;
 
-	private List<Property> properties;
+	@DBRef(lazy=true)
+	private List<EnvrionmentProperties> envProperties;
 
 	public String getPropertyGroupName() {
 		return propertyGroupName;
@@ -28,12 +29,13 @@ public class PropertyGroup {
 		this.propertyGroupName = propertyGroupName;
 	}
 
-	public List<Property> getProperties() {
-		return properties;
+
+	public List<EnvrionmentProperties> getEnvProperties() {
+		return envProperties;
 	}
 
-	public void setProperties(List<Property> properties) {
-		this.properties = properties;
+	public void setEnvProperties(List<EnvrionmentProperties> envProperties) {
+		this.envProperties = envProperties;
 	}
 
 	public String getPropertyGroupId() {
@@ -46,7 +48,7 @@ public class PropertyGroup {
 	
 	public Properties getProps() {
 		Properties props = new Properties();
-		for(Property property : properties) {
+		for(Property property : envProperties.get(0).getProperties()) {
 			props.put(property.getKey(), property.getValue());
 		}
 		

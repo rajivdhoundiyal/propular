@@ -2,6 +2,7 @@ package org.propular;
 
 import java.security.KeyPair;
 
+import org.modelmapper.ModelMapper;
 import org.propular.constants.PropularConstants;
 import org.propular.dto.security.AppClient;
 import org.propular.dto.security.AppUser;
@@ -223,6 +224,11 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 	public void addViewControllers(ViewControllerRegistry registry) {
 		registry.addViewController("/login").setViewName("login");
 		registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+	}
+	
+	@Bean
+	public ModelMapper modelMapper() {
+	    return new ModelMapper();
 	}
 
 }
