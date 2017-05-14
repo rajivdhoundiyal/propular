@@ -51,8 +51,10 @@ public class PropertyGroupController {
 	}
 
 	@RequestMapping(value = "/{projectid}/propertygroup", method = RequestMethod.GET)
-	public @ResponseBody Collection<PropertyGroupVO> getPropertyGroups() {
-		return mappingUtility.convertToVO(propertyGroupRepository.findAll(), PropertyGroupVO.class);
+	public @ResponseBody Collection<PropertyGroupVO> getPropertyGroups(@PathVariable("projectid") String projectid) {
+
+		return mappingUtility.convertToVO(projectRepository.findOne(projectid).getPropertyGroup(),
+				PropertyGroupVO.class);
 	}
 
 	@RequestMapping(value = "/{projectid}/propertygroup/{id}", method = RequestMethod.GET)

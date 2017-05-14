@@ -1,4 +1,4 @@
-var app = angular.module('propular', []);
+var app = angular.module('propular', ["checklist-model"]);
 
 app.filter('formatProjectId' , formatProjectId)
 
@@ -14,8 +14,7 @@ function formatProjectId() {
 
  }
 
-
-}
+};
 
 app.factory('notificationService', function($rootScope) {
     var notificationService = {
@@ -72,7 +71,7 @@ app.directive('notification', ['$interval', function ($interval) {
     };
 }]); 
 
-app.controller('projectController', function($scope, $http, notificationService) {
+app.controller('projectController', function($rootScope, $scope, $http, notificationService) {
 	
 	$scope.project = {
 		name : "",
@@ -87,7 +86,6 @@ app.controller('projectController', function($scope, $http, notificationService)
 			url : "/project"
 		}).then(function mySucces(response) {
 			$scope.projects = response.data;
-			//$scope.$digest();
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		})
@@ -122,7 +120,6 @@ app.controller('projectController', function($scope, $http, notificationService)
 			data : $scope.projectsToDelete
 		}).then(function mySucces(response) {
 			$scope.projects = response.data;
-			//$scope.$digest();
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		})
@@ -135,14 +132,10 @@ app.controller('projectController', function($scope, $http, notificationService)
 			data : $scope.project
 		}).then(function mySucces(response) {
 			$scope.projects = response.data;
-			//$scope.$digest();
 		}, function myError(response) {
 			console.log(response);
 			$scope.error = response.statusText;
 			notificationService.prepForBroadcast(response.data.errors[0].defaultMessage,"show", "danger", true);
-			/*$scope.notification.status = "show";
-			$scope.notification.message = response.data.errors[0].defaultMessage;
-			$scope.notification.type = "danger";*/
 		})
 	};
 
@@ -152,7 +145,7 @@ app.controller('projectController', function($scope, $http, notificationService)
 			method : "GET",
 			url : "/"+project.projectId+"/propertygroup"
 		}).then(function mySucces(response) {
-			$scope.propertyGroup = response.data;
+			$rootScope.$broadcast("handleProjectDetailBroadcast", response.data);
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		})
@@ -176,12 +169,22 @@ app.controller('propertyGroupController', function($scope, $http, notificationSe
 	
 	$scope.propsToDelete = [];
 	
-	$scope.viewPropertyGroup = function(propertyGroup) {
-		$scope.propertyGroup = propertyGroup;
+	$scope.$on("handleProjectDetailBroadcast", function(event, projectGroup){
+		$scope.propertyGroup = projectGroup;
+	});
+	
+	$scope.viewProperties = function(propertyGroup) {
 		$scope.properties = $scope.propertyGroup.properties;
-		//$scope.$apply();
+		$http({
+			method : "GET",
+			url : "/"+project.projectId+"/propertygroup"
+		}).then(function mySucces(response) {
+			$rootScope.$broadcast("handleProjectDetailBroadcast", response.data);
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		});
 	};
-
+	
 	$scope.addGroupForDelete = function(group) {
 		var index = $scope.groupsToDelete.indexOf(group);
 		if (index > -1) {
@@ -230,7 +233,6 @@ app.controller('propertyGroupController', function($scope, $http, notificationSe
 			$scope.propertyGroup.properties.push($scope.property);
 		}
 		$scope.property = {};
-		//$scope.$digest();
 	};
 
 	$scope.savePropertyGroup = function(projectDetail) {
@@ -239,12 +241,7 @@ app.controller('propertyGroupController', function($scope, $http, notificationSe
 				|| projectDetail.propertyGroup == null) {
 			projectDetail.propertyGroup = [];
 		}
-		/*var index = projectDetail.propertyGroup.indexOf($scope.propertyGroup);
-		if (index > -1) {
-			alert('Group already exists.');
-		} else {*/
 		projectDetail.propertyGroup.push($scope.propertyGroup);
-		/*}*/
 
 		$http({
 			method : "POST",
@@ -289,18 +286,18 @@ app.controller('environmentController', function($scope, $http, notificationServ
 
 	$scope.environmentsToDelete = [];
 	
-	$scope.getEnvironments = function() {
-		$http({
-			method : "GET",
-			url : "/environment"
-		}).then(function mySucces(response) {
-			$scope.environments = response.data;
-		}, function myError(response) {
-			$scope.error = response.statusText;
-		})
-	};
-	
-	$scope.addEnvironmentForDelete = function(environment) {
+    $('#collapseEnvironment').on('show.bs.collapse', function() {
+	    	$http({
+				method : "GET",
+				url : "/environment"
+			}).then(function mySucces(response) {
+				$scope.environments = response.data;
+			}, function myError(response) {
+				$scope.error = response.statusText;
+			});
+    });
+
+    $scope.addEnvironmentForDelete = function(environment) {
 		var index = $scope.environmentsToDelete.indexOf(environment);
 		if (index > -1) {
 			$scope.environmentsToDelete.splice(environment, 1);
@@ -355,6 +352,156 @@ app.controller('environmentController', function($scope, $http, notificationServ
 			data : $scope.environmentsToDelete
 		}).then(function mySucces(response) {
 			$scope.environments = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+});
+
+app.controller('userController', function($scope, $http, notificationService, $timeout) {
+	
+	$scope.user = {
+		userName : "",
+		password: "",
+		description : "",
+		roles: [],
+		scopes: [],
+		grantTypes: []
+	};
+
+	$scope.userToDelete = [];
+	
+	$('#collapseUser').on('show.bs.collapse', function() {
+		$http({
+			method : "GET",
+			url : "/user"
+		}).then(function mySucces(response) {
+			$scope.users = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+	});
+	
+	$scope.addUserForDelete = function(environment) {
+		var index = $scope.environmentsToDelete.indexOf(environment);
+		if (index > -1) {
+			$scope.environmentsToDelete.splice(environment, 1);
+		} else {
+			$scope.environmentsToDelete.push(environment);
+		}
+	}
+	
+	$scope.addAllUserForDelete = function(allEnvDelCheck) {
+		angular.forEach($scope.environments, function (item) {
+            item.checked = allEnvDelCheck;
+            $scope.addEnvironmentForDelete(item);
+        });
+		
+		if(!allEnvDelCheck) {
+			$scope.addEnvironmentForDelete = [];
+		}
+	}
+	
+	$scope.saveUser = function(event) {
+		
+		if($scope.user.userName == null || $scope.user.userName == '') {
+			notificationService.prepForBroadcast("Please enter valid username.","show", "danger", true);
+			event.stopPropagation();
+			return;
+		} else if ($scope.user.password == null || $scope.user.password == '') {
+			notificationService.prepForBroadcast("Please enter password.","show", "danger", true);
+			event.stopPropagation();
+			return;
+		} else if (($scope.user.roles == null || $scope.user.roles.length <= 0) &&
+				(($scope.user.scopes == null || $scope.user.scopes.length <= 0) &&
+				($scope.user.grantTypes == null || $scope.user.grantTypes.length <= 0))) {
+			notificationService.prepForBroadcast("Please choose at least one from console privileges or API.","show", "danger", true);
+			event.stopPropagation();
+			return;
+		} else if ((($scope.user.scopes == null || $scope.user.scopes.length <= 0) &&
+						($scope.user.grantTypes != null || $scope.user.grantTypes.length > 0))
+				|| (($scope.user.scopes != null || $scope.user.scopes.length > 0) &&
+						($scope.user.grantTypes == null || $scope.user.grantTypes.length <= 0))) {
+					notificationService.prepForBroadcast("Please choose at least one from console API Scope and Grant.","show", "danger", true);
+					event.stopPropagation();
+					return;
+		} else if (!($scope.user.password === $scope.user.reentpassword)) {
+			notificationService.prepForBroadcast("Please make sure the passwords should match.","show", "danger", true);
+			event.stopPropagation();
+			return;
+		} 
+		
+		$scope.environmentAriaFlag = true;
+		
+		$http({
+			method : "POST",
+			url : "/user",
+			data : $scope.user
+		}).then(function mySucces(response) {
+			$scope.users = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+
+	$scope.deleteUsers = function(event) {
+		
+		if($scope.environmentsToDelete == null || $scope.environmentsToDelete.length <= 0) {
+			notificationService.prepForBroadcast("Please select environment to delete first.","show", "danger", true);
+			event.stopPropagation();
+		}
+		
+		$http({
+			method : "PATCH",
+			url : "/user",
+			data : $scope.environmentsToDelete
+		}).then(function mySucces(response) {
+			$scope.environments = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+	
+	$('#collapseUser').on('show.bs.collapse', function() {
+		$scope.getRoles();
+	});
+	
+	$scope.getRoles = function() {
+		
+		$http({
+			method : "GET",
+			url : "/role",
+		}).then(function mySucces(response) {
+			$scope.roles = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+	
+	$scope.getUserRole = function() {
+		
+		$http({
+			method : "GET",
+			url : "/role/user",
+		}).then(function mySucces(response) {
+			$scope.userRoles = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		})
+
+	};
+	
+	$scope.getClientRole = function() {
+		
+		$http({
+			method : "GET",
+			url : "/role/client",
+		}).then(function mySucces(response) {
+			$scope.clientRoles = response.data;
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		})

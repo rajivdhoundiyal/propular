@@ -170,17 +170,20 @@ public class PropularApplication extends WebMvcConfigurerAdapter {
 	@Service
 	protected static class AppClientsUserDetailsService implements ClientDetailsService {
 
-		@Autowired
-		AppClientsRepository appClientsRepository;
+		/*@Autowired
+		AppClientsRepository appClientsRepository;*/
 
+		@Autowired
+		AppUsersRepository appUsersRepository;
+		
 		@Override
 		public ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException {
-			AppClient client = appClientsRepository.findByClientId(clientId);
+			AppUser client = appUsersRepository.findByUserName(clientId);
 			BaseClientDetails clientDetails = new BaseClientDetails();
-			clientDetails.setClientId(client.clientId);
-			clientDetails.setClientSecret(client.clientSecret);
-			clientDetails.setScope(client.getScopes());
-			clientDetails.setAuthorizedGrantTypes(client.getGrantTypes());
+			clientDetails.setClientId(client.getUserName());
+			clientDetails.setClientSecret(client.getPassword());
+			clientDetails.setScope(client.getScopeArray());
+			clientDetails.setAuthorizedGrantTypes(client.getGrantTypeArray());
 			return clientDetails;
 		}
 
