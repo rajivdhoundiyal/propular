@@ -4,9 +4,7 @@ import java.security.KeyPair;
 
 import org.modelmapper.ModelMapper;
 import org.propular.constants.PropularConstants;
-import org.propular.dto.security.AppClient;
 import org.propular.dto.security.AppUser;
-import org.propular.service.dao.AppClientsRepository;
 import org.propular.service.dao.AppUsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

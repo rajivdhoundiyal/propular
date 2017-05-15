@@ -1,9 +1,7 @@
 package org.propular.vo;
 
+import java.util.Arrays;
 import java.util.Collection;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class GetUserVO {
 
@@ -32,16 +30,20 @@ public class GetUserVO {
 		return scopes;
 	}
 
-	public void setScopes(Collection<String> scopes) {
-		this.scopes = scopes;
+	public void setScopes(String scopes) {
+		if (scopes != null) {
+			this.scopes = Arrays.asList(scopes.split(","));
+		}
 	}
 
 	public Collection<String> getGrantTypes() {
 		return grantTypes;
 	}
 
-	public void setGrantTypes(Collection<String> grantTypes) {
-		this.grantTypes = grantTypes;
+	public void setGrantTypes(String grantTypes) {
+		if (grantTypes != null) {
+			this.grantTypes = Arrays.asList(grantTypes.split(","));
+		}
 	}
 
 }

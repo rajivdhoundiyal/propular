@@ -324,7 +324,7 @@
 								ng-click="deleteEnvironments($event)">Delete</button>
 						</div>
 					</form>
-					<table class="table table-striped table-hover">
+					<table class="table table-bordered table-hover">
 						<thead class="thead-default">
 							<tr>
 								<th ng-click="$event.stopPropagation()"><input
@@ -374,21 +374,21 @@
 								placeholder="Username"></input>
 						</div>
 						<div class="form-group">
-							<input type="text" class="form-control" id="password"
+							<input type="password" class="form-control" id="password"
 								ng-model="user.password" ng-pattern="/^[a-zA-Z]\w{3,14}$/" placeholder="Password"></input>
 						</div>
 						<div class="form-group">
-							<input type="text" class="form-control" id="reentpassword"
+							<input type="password" class="form-control" id="reentpassword"
 								ng-model="user.reentpassword" placeholder="Re-Enter Password"></input>
 						</div>
 						<div class="btn-toolbar mb-3" role="toolbar"
 							aria-label="Toolbar with button groups">
 							<div class="btn-group mr-2 btn-group-sm hidden-xs" role="group"
 								aria-label="First group" > <!-- data-toggle="buttons" -->
-								<label class="btn btn-success active"> <input
+								<label class="btn btn-primary"> <input
 									type="radio" checked="true" name="userRoleAll"
 									autocomplete="off" style="display: none;">Console Privileges</input>
-								</label> <label class="btn btn-success"
+								</label> <label class="btn btn-info"
 									ng-repeat="userRole in roles.userRoles"> <input 
 									type="checkbox" name="userRole" checklist-model="user.roles"
 									checklist-value="userRole.name" >{{userRole.name}}</input>
@@ -397,9 +397,9 @@
 
 							<div class="btn-group mr-2 btn-group-sm hidden-xs" role="group"
 								aria-label="First group">
-								<label class="btn btn-warning active"> <input
+								<label class="btn btn-primary"> <input
 									type="radio" checked="true" style="display: none;">API Scope</input>
-								</label> <label class="btn btn-warning"
+								</label> <label class="btn btn-info"
 									ng-repeat="clientRole in roles.clientRoles"> <input
 									type="checkbox" checklist-model="user.scopes"
 									checklist-value="clientRole.name">{{clientRole.name
@@ -412,9 +412,9 @@
 							aria-label="Toolbar with button groups">
 							<div class="btn-group mr-2 btn-group-sm hidden-xs" role="group"
 								aria-label="First group">
-								<label class="btn btn-warning active"> <input
+								<label class="btn btn-primary"> <input
 									type="radio" checked="true" style="display: none;">API Grant</input>
-								</label> <label class="btn btn-warning"
+								</label> <label class="btn btn-info"
 									ng-repeat="clientGrant in roles.clientGrants"> <input
 									type="checkbox" checklist-model="user.grantTypes"
 									checklist-value="clientGrant.grant">{{clientGrant.grant
@@ -429,7 +429,7 @@
 								ng-click="deleteUsers($event)">Delete</button>
 						</div>
 					</form>
-					<table class="table table-striped table-hover">
+					<table class="table table-bordered table-hover">
 						<thead class="thead-default">
 							<tr>
 								<th ng-click="$event.stopPropagation()"><input
@@ -449,7 +449,78 @@
 									ng-click="addEnvironmentForDelete(environment)"
 									ng-model="environment.checked"></input></td>
 								<td>{{user.userName}}</td>
-								<td>{{user.roles}},{{user.scopes}},{{user.grantTypes}}</td>
+								<td>
+								<div class="btn-toolbar" role="toolbar"
+										aria-label="Toolbar with button groups">
+										<div class="btn-group btn-group-sm mr-2" role="group"
+											aria-label="Button group with nested dropdown">
+											<button type="button" class="btn btn-secondary"
+												ng-repeat="(key, role) in user.roles" ng-if="key &lt; 2">{{role | uppercase}}</button>
+											<button type="button" class="btn btn-secondary"
+												ng-repeat="(key, role) in user.roles"
+												ng-if="(user.roles.length == 3) &#38;&#38; (key == 2)">{{role | uppercase}}</button>
+											<div class="btn-group btn-group-sm" role="group" ng-if="(user.roles.length &gt; 3)">
+												<button id="btnGroupDrop1" type="button"
+													ng-repeat="(key, role) in user.roles"
+													ng-if="(key == 2) &#38;&#38; (user.roles.length &gt; 3)"
+													class="btn btn-secondary dropdown-toggle"
+													data-toggle="dropdown" aria-haspopup="true"
+													aria-expanded="false">{{role | uppercase}}</button>
+												<div class="dropdown-menu" aria-labelledby="btnGroupDrop1"
+													ng-if="user.roles.length &gt; 3">
+													<a class="dropdown-item" href="#"
+														ng-repeat="(key, role) in user.roles" ng-if="key &gt; 2">{{role | uppercase}}</a>
+												</div>
+											</div>
+										</div>
+
+										<div class="btn-group btn-group-sm mr-2" scope="group"
+											aria-label="Button group with nested dropdown">
+											<button type="button" class="btn btn-secondary"
+												ng-repeat="(key, scope) in user.scopes" ng-if="key &lt; 2">{{scope | uppercase}}</button>
+											<button type="button" class="btn btn-secondary"
+												ng-repeat="(key, scope) in user.scopes"
+												ng-if="(user.scopes.length == 3) &#38;&#38; (key == 2)">{{scope | uppercase}}</button>
+											<div class="btn-group btn-group-sm" scope="group">
+												<button id="btnGroupDrop1" type="button"
+													ng-repeat="(key, scope) in user.scopes"
+													ng-if="(key == 2) &#38;&#38; (user.scopes.length &gt; 3)"
+													class="btn btn-secondary dropdown-toggle"
+													data-toggle="dropdown" aria-haspopup="true"
+													aria-expanded="false">{{scope | uppercase}}</button>
+												<div class="dropdown-menu" aria-labelledby="btnGroupDrop1"
+													ng-if="user.scopes.length &gt; 3">
+													<a class="dropdown-item" href="#"
+														ng-repeat="(key, scope) in user.scopes" ng-if="key &gt; 2">{{scope | uppercase}}</a>
+												</div>
+											</div>
+										</div>
+
+										<div class="btn-group btn-group-sm mr-2" grantType="group"
+											aria-label="Button group with nested dropdown">
+											<button type="button" class="btn btn-secondary"
+												ng-repeat="(key, grantType) in user.grantTypes"
+												ng-if="key &lt; 2">{{grantType | uppercase}}</button>
+											<button type="button" class="btn btn-secondary"
+												ng-repeat="(key, grantType) in user.grantTypes"
+												ng-if="(user.grantTypes.length == 3) &#38;&#38; (key == 2)">{{grantType | uppercase}}</button>
+											<div class="btn-group btn-group-sm" grantType="group">
+												<button id="btnGroupDrop1" type="button"
+													ng-repeat="(key, grantType) in user.grantTypes"
+													ng-if="(key == 2) &#38;&#38; (user.grantTypes.length &gt; 3)"
+													class="btn btn-secondary dropdown-toggle"
+													data-toggle="dropdown" aria-haspopup="true"
+													aria-expanded="false">{{grantType | uppercase}}</button>
+												<div class="dropdown-menu" aria-labelledby="btnGroupDrop1"
+													ng-if="user.grantTypes.length &gt; 3">
+													<a class="dropdown-item" href="#"
+														ng-repeat="(key, grantType) in user.grantTypes"
+														ng-if="key &gt; 2">{{grantType | uppercase}}</a>
+												</div>
+											</div>
+										</div>
+									</div>
+								</td>
 							</tr>
 						</tbody>
 					</table>

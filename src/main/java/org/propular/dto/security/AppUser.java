@@ -90,4 +90,13 @@ public class AppUser {
 		}
 		return null;
 	}
+
+	public void setScopes(String scopes) {
+		this.scopes = scopes;
+	}
+
+	public void setGrantTypes(String grantTypes) {
+		this.grantTypes = grantTypes;
+	}
+	
 }
