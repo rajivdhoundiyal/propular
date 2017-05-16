@@ -19,7 +19,7 @@ public class PropertyGroup {
 	private String propertyGroupName;
 
 	@DBRef(lazy=true)
-	private List<EnvrionmentProperties> envProperties;
+	private List<EnvironmentProperties> envProperties;
 
 	public String getPropertyGroupName() {
 		return propertyGroupName;
@@ -30,11 +30,11 @@ public class PropertyGroup {
 	}
 
 
-	public List<EnvrionmentProperties> getEnvProperties() {
+	public List<EnvironmentProperties> getEnvProperties() {
 		return envProperties;
 	}
 
-	public void setEnvProperties(List<EnvrionmentProperties> envProperties) {
+	public void setEnvProperties(List<EnvironmentProperties> envProperties) {
 		this.envProperties = envProperties;
 	}
 

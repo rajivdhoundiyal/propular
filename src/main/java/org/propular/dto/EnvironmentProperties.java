@@ -8,14 +8,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "environmentProperties")
-public class EnvrionmentProperties {
+public class EnvironmentProperties {
 
 	@Id
 	@Field("id")
 	private String id;
 
-	@DBRef
-	private Environment environment;
+	private String environment;
 
 	private List<Property> properties;
 
@@ -27,11 +26,11 @@ public class EnvrionmentProperties {
 		this.id = id;
 	}
 
-	public Environment getEnvironment() {
+	public String getEnvironment() {
 		return environment;
 	}
 
-	public void setEnvironment(Environment environment) {
+	public void setEnvironment(String environment) {
 		this.environment = environment;
 	}
 

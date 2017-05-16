@@ -153,13 +153,13 @@ app.controller('projectController', function($rootScope, $scope, $http, notifica
 
 });
 
-app.controller('propertyGroupController', function($scope, $http, notificationService) {
+app.controller('propertyGroupController', function($rootScope, $scope, $http, notificationService) {
 	$scope.propertyGroup = {
 		propertyGroupName : "",
 		propertyGroupDescription : "",
 		properties : []
 	};
-
+	
 	$scope.property = {
 		key : "",
 		value : ""
@@ -169,21 +169,56 @@ app.controller('propertyGroupController', function($scope, $http, notificationSe
 	
 	$scope.propsToDelete = [];
 	
+	$scope.environmentDropValue;
+	
 	$scope.$on("handleProjectDetailBroadcast", function(event, projectGroup){
+		$scope.propertyGroup = projectGroup;
+		$scope.environmentProperty = projectGroup.envProperties;
+
+		if($scope.environmentProperty == null) {
+				$scope.environmentProperty = {
+					environment: "",
+					envProperties: []
+				};
+		}
+	});
+	
+	$scope.$on("handleProjectGroupBroadcast", function(event, projectGroup){
 		$scope.propertyGroup = projectGroup;
 	});
 	
 	$scope.viewProperties = function(propertyGroup) {
-		$scope.properties = $scope.propertyGroup.properties;
-		$http({
+		$rootScope.$broadcast("handleProjectGroupBroadcast", propertyGroup);
+		//$scope.properties = $scope.propertyGroup.properties;
+		/*$http({
 			method : "GET",
 			url : "/"+project.projectId+"/propertygroup"
 		}).then(function mySucces(response) {
 			$rootScope.$broadcast("handleProjectDetailBroadcast", response.data);
 		}, function myError(response) {
 			$scope.error = response.statusText;
-		});
+		});*/
 	};
+	
+	$('#collapseProjectProperty').on('show.bs.collapse', function() {
+    	$http({
+			method : "GET",
+			url : $scope.propertyGroup.propertyGroupId + "/properties"
+		}).then(function mySucces(response) {
+			$scope.environmentProperties = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		});
+    	
+    	$http({
+			method : "GET",
+			url : "/environment"
+		}).then(function mySucces(response) {
+			$scope.environments = response.data;
+		}, function myError(response) {
+			$scope.error = response.statusText;
+		});
+	});
 	
 	$scope.addGroupForDelete = function(group) {
 		var index = $scope.groupsToDelete.indexOf(group);
@@ -226,12 +261,18 @@ app.controller('propertyGroupController', function($scope, $http, notificationSe
 	}
 	
 	$scope.addProperty = function() {
-		var index = $scope.propertyGroup.properties.indexOf($scope.property);
-		if (index > -1) {
-			alert('Key already exists.');
-		} else {
-			$scope.propertyGroup.properties.push($scope.property);
+		
+		if($scope.environmentProperty.environment != null) {
+			$scope.environmentProperty.environment = $scope.environmentDropValue;
+			var index = $scope.environmentProperty[environment].envProperties.indexOf($scope.property);
+			if (index > -1) {
+				alert('Key already exists.');
+			} else {
+				$scope.environmentProperty[environment].envProperties.push($scope.property);
+			}
 		}
+
+		
 		$scope.property = {};
 	};
 

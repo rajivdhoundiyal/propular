@@ -1,0 +1,63 @@
+<environment>
+<div class="card" ng-controller="environmentController">
+	<div id="collapseEnvironment" class="collapse hide" role="tabpanel"
+		aria-labelledby="headingOne">
+		<div class="card-header">
+			<div class="form-inline">
+				<button class="btn btn-primary btn-sm" type="button"
+					data-toggle="collapse" data-target="#collapseProjectList"
+					data-parent="#accordion" aria-expanded="false"
+					aria-controls="collapseExample">&lt;</button>
+				<nav class="breadcrumb default">
+					<h6 class="breadcrumb-item active">Create Environment</h6>
+				</nav>
+			</div>
+		</div>
+
+		<form action="#">
+			<div class="form-group">
+				<input type="text" class="form-control" id="environmentName"
+					ng-model="environment.name" ng-pattern="/^[a-zA-Z]*$/"
+					placeholder="Environment Name"></input>
+			</div>
+			<div class="form-group">
+				<input type="text" class="form-control" id="environmentDescription"
+					ng-model="environment.description"
+					placeholder="Environment Description"></input>
+			</div>
+			<div class="card-footer">
+				<button class="btn btn-primary btn-sm" type="button"
+					ng-click="saveEnvironment($event)">Add Environment</button>
+				<button class="btn btn-primary btn-sm" type="button"
+					ng-click="deleteEnvironments($event)">Delete</button>
+			</div>
+		</form>
+		<table class="table table-bordered table-hover">
+			<thead class="thead-default">
+				<tr>
+					<th ng-click="$event.stopPropagation()"><input type="checkbox"
+						ng-click="addAllEnvironmentForDelete(allProjectDelCheck)"
+						ng-model="allProjectDelCheck"></input></th>
+					<th>Name</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<tbody>
+
+				<tr colspan="4"
+					ng-if="environments == null || environments.length &lt; 1">
+					<td colspan="4">No data</td>
+				</tr>
+				<tr ng-repeat="environment in environments">
+					<td scope="row" ng-click="$event.stopPropagation()"><input
+						id="environmentDeleteAll" type="checkbox"
+						ng-click="addEnvironmentForDelete(environment)"
+						ng-model="environment.checked"></input></td>
+					<td>{{environment.name}}</td>
+					<td>{{environment.description}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+</environment>
