@@ -79,7 +79,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr colspan="4" ng-if="projects == null || projects.length &lt; 1"><td colspan="4">No data</td></tr>
+							<tr colspan="4" ng-if="projects == null || projects.length &lt; 1"><td colspan="4">No Projects</td></tr>
 							<tr ng-repeat="project in projects" data-toggle="collapse"
 								data-target="#collapseProjectDetails" data-parent="#accordion"
 								aria-controls="collapseExample" aria-expanded="false"
@@ -129,11 +129,11 @@
 					</div>
 
 					<form action="#">
-						<div class="form-group">
+						<div class="form-group top-bottom-margin">
 							<input type="text" class="form-control" id="projectName"
 								ng-model="project.name" placeholder="Project Name"></input>
 						</div>
-						<div class="form-group">
+						<div class="form-group top-bottom-margin">
 							<input type="text" class="form-control" id="projectDescription"
 								ng-model="project.description" placeholder="Project Description"></input>
 						</div>

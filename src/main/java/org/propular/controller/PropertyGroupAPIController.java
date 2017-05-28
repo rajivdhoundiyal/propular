@@ -1,8 +1,10 @@
 package org.propular.controller;
 
+import java.util.Collection;
 import java.util.Properties;
 
 import org.propular.dto.Project;
+import org.propular.dto.Property;
 import org.propular.service.dao.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,11 +22,11 @@ public class PropertyGroupAPIController {
 	
 	//@PreAuthorize("#oauth2.hasScope('read') and isAnonyms()")
 	@GetMapping("/properties/{projectId}/{groupName}/{env}")
-	public @ResponseBody Properties getProperties(@PathVariable("projectId") String projectId, @PathVariable("groupName") String groupName,
+	public @ResponseBody Collection<Property> getProperties(@PathVariable("projectId") String projectId, @PathVariable("groupName") String groupName,
 			@PathVariable("env") String env) {
 		
 		Project project = projectReposiory.findByProjectId(projectId);
-		return project.getPropertyGroup().get(0).getProps();
+		return project.getPropertyGroup().get(0).getEnvProperties().iterator().next().getProperties();
 		
 	}
 	

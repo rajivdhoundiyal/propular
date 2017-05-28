@@ -1,13 +1,12 @@
 package org.propular.controller;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import javax.validation.Valid;
 
 import org.propular.dto.EnvironmentProperties;
 import org.propular.dto.PropertyGroup;
+import org.propular.service.dao.EnvironmentPropertiesRepository;
 import org.propular.service.dao.PropertyGroupRepository;
 import org.propular.util.MappingUtility;
 import org.propular.vo.EnvironmentPropertiesVO;
@@ -26,21 +25,24 @@ public class PropertiesController {
 
 	@Autowired
 	PropertyGroupRepository propertyGroupRepository;
+	
+	@Autowired
+	EnvironmentPropertiesRepository environmentPropertiesRepository;
 
 	@RequestMapping(value = "/{propertyGroupId}/properties", method = RequestMethod.POST)
 	public Collection<EnvironmentPropertiesVO> saveProperties(@PathVariable("propertyGroupId") String propertyGroupId,
-			@RequestBody @Valid EnvironmentPropertiesVO environmentPropertiesVO) {
+			@RequestBody @Valid Collection<EnvironmentPropertiesVO> environmentPropertiesVO) {
 
 		PropertyGroup propertyGroup = propertyGroupRepository.findOne(propertyGroupId);
-		EnvironmentProperties incoming = mappingUtility.convertToDTO(environmentPropertiesVO,
+		Collection<EnvironmentProperties> incoming = mappingUtility.convertToDTO(environmentPropertiesVO,
 				EnvironmentProperties.class);
 
+		incoming = environmentPropertiesRepository.save(incoming);
+		
 		if (propertyGroup.getEnvProperties() == null) {
-			List<EnvironmentProperties> environmentProperties = new ArrayList<>();
-			environmentProperties.add(incoming);
-			propertyGroup.setEnvProperties(environmentProperties);
+			propertyGroup.setEnvProperties(incoming);
 		} else {
-			propertyGroup.getEnvProperties().add(incoming);
+			propertyGroup.getEnvProperties().addAll(incoming);
 		}
 
 		propertyGroup = propertyGroupRepository.save(propertyGroup);
@@ -53,7 +55,8 @@ public class PropertiesController {
 			@PathVariable("propertyGroupId") String propertyGroupId) {
 
 		PropertyGroup propertyGroup = propertyGroupRepository.findOne(propertyGroupId);
-
-		return mappingUtility.convertToVO(propertyGroup.getEnvProperties(), EnvironmentPropertiesVO.class);
+		Collection<EnvironmentProperties> environmentProperties = propertyGroup.getEnvProperties();
+		return mappingUtility.convertToVO(environmentProperties, EnvironmentPropertiesVO.class);
 	}
+
 }

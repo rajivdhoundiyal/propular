@@ -1,5 +1,6 @@
 package org.propular.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class MappingUtility<VO, DTO> {
 	}
 	
 	public Collection<DTO> convertToDTO(Collection<VO> projects, Class<DTO> clazz) {
-		if(projects == null) {
+		if(projects == null || projects.isEmpty()) {
 			return null;
 		}
 		return projects.stream().map(project -> modelMapper.map(project, clazz))
@@ -35,11 +36,17 @@ public class MappingUtility<VO, DTO> {
 	}
 	
 	public Collection<VO> convertToVO(Collection<DTO> projects, Class<VO> clazz) {
-		if(projects == null) {
+		if(projects == null || projects.isEmpty()) {
 			return null;
 		}
-		return projects.stream().map(project -> modelMapper.map(project, clazz))
-				.collect(Collectors.toList());
+		
+		Collection<VO> vos = new ArrayList<>();
+		for(DTO dto : projects) {
+			if(dto != null) {
+				vos.add(modelMapper.map(dto, clazz));
+			}
+		}
+		return vos;
 	}
 	
 	public VO convertToVO(DTO object, Class<VO> clazz) {

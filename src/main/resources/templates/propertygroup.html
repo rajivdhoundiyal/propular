@@ -26,14 +26,14 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr ng-if="propertyGroup == null || propertyGroup.length &lt; 1">
-					<td colspan="4">No data</td>
+				<tr ng-if="propertyGroups == null || propertyGroups.length &lt; 1">
+					<td colspan="4">No Property Groups</td>
 				</tr>
-				<tr ng-repeat="group in propertyGroup" data-toggle="collapse"
+				<tr ng-repeat="group in propertyGroups" data-toggle="collapse"
 					data-target="#collapseProjectProperty" data-parent="#accordion"
 					aria-controls="collapseExample" aria-expanded="false"
 					ng-click="viewProperties(group)"
-					ng-if="propertyGroup != null || propertyGroup.length &gt; 0">
+					ng-if="propertyGroups != null || propertyGroups.length &gt; 0">
 					<td scope="row" ng-click="$event.stopPropagation()"><input
 						type="checkbox" ng-click="addGroupForDelete(group)"
 						ng-model="group.checked"></input></td>
@@ -48,7 +48,7 @@
 			<button class="btn btn-primary btn-sm" type="button"
 				data-toggle="collapse" data-target="#collapseProjectProperty"
 				data-parent="#accordion" aria-controls="collapseExample"
-				aria-expanded="false">Add Property Group</button>
+				aria-expanded="false" ng-click="adding()">Add Property Group</button>
 			<button ng-if="groupsToDelete.length == 1"
 				class="btn btn-warning btn-sm" type="button">Security Token</button>
 			<!-- </div> -->
@@ -69,12 +69,12 @@
 						aria-controls="collapseExample">&lt;</button>
 					<nav class="breadcrumb default">
 						<h6 class="breadcrumb-item active">{{projectDetail.name}}</h6>
-						<h6 ng-if="propertyGroup.propertyGroupName.trim() != ''"
+						<h6 ng-if="propertyGroup != null &amp;&amp; propertyGroup.propertyGroupName !== ''"
 							class="breadcrumb-item active">{{propertyGroup.propertyGroupName}}</h6>
-						<h6 class="breadcrumb-item active">Properties</h6>
+						<h6 class="breadcrumb-item active" ng-if="propertyGroup != null &amp;&amp; propertyGroup.propertyGroupName !== ''">Properties</h6>
 					</nav>
 				</div>
-				<div class="form-group">
+				<div class="form-group top-bottom-margin">
 					<input type="text" class="form-control" id="propertyGroupName"
 						ng-model="propertyGroup.propertyGroupName"
 						placeholder="Property Group Name"></input>
@@ -87,30 +87,17 @@
 								ng-model="allPropDelCheck"></input></th>
 							<th>Key</th>
 							<th>
-								<!-- <div class="form-inline"> -->
-									<!-- <text>Environment&nbsp;</text> -->
-									<!-- <div class="dropdown active">
-										<text class="dropdown-toggle" href="http://example.com"
-											id="envDropdownMenuLink" data-toggle="dropdown"
-											aria-haspopup="true" aria-expanded="false">{{environments[0].name}}</text>
-										<div class="dropdown-menu"
-											aria-labelledby="envDropdownMenuLink">
-											<a class="dropdown-item" href="#"
-												ng-repeat="env in environments">{{env.name}}</a>
-										</div>
-									</div> -->
-									<select class="custom-select">
-										<option selected="true">Environment</option>
-										<option ng-repeat="env in environments" ng-model="environmentDropValue">{{env.name}}</option>
-									</select>
-								<!-- </div> -->
+								<select class="custom-select" ng-model="environmentDropValue" ng-change="environmentChange(environmentDropValue)">
+									<option selected="true">Environment</option>
+									<option ng-repeat="env in environments">{{env.name}}</option>
+								</select>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-repeat="prop in environmentProperty.envProperties | filter:environmentDropValue ">
+						<tr ng-repeat="prop in selectedProperty.properties">
 							<td scope="row"><input type="checkbox"
-								ng-click="addPropForDelete(prop)" ng-model="prop.checked"></input></td>
+								ng-click="addPropForDelete(prop)" ng-model="env.checked"></input></td>
 							<td>{{prop.key}}</td>
 							<td>{{prop.value}}</td>
 						</tr>
@@ -124,7 +111,6 @@
 					</tbody>
 				</table>
 				<div class="card-footer">
-					<!-- <div class="form-group"> -->
 					<button class="btn btn-secondary btn-sm" type="button"
 						ng-click="addProperty()">+</button>
 					<button class="btn btn-danger btn-sm" type="button"
@@ -132,8 +118,10 @@
 					<button class="btn btn-success btn-sm" type="button"
 						data-toggle="collapse" data-target="#collapseProjectDetails"
 						data-parent="#accordion" aria-controls="collapseExample"
-						aria-expanded="false" ng-click="savePropertyGroup(projectDetail)">Save</button>
-					<button class="btn btn-warning btn-sm" type="button"
+						ng-if="selectedProperty.properties != null &amp;&amp; selectedProperty.properties.length > 0"
+						aria-expanded="false" ng-click="savePropertyGroup()">Save</button>
+					<button class="btn btn-warning btn-sm" type="button" 
+					ng-if="selectedProperty.properties != null &amp;&amp; selectedProperty.properties.length > 0"
 						data-toggle="collapse" data-target="#collapseProjectDetails"
 						data-parent="#accordion" aria-controls="collapseExample"
 						aria-expanded="false" ng-click="savePropertyGroup(projectDetail)">Security

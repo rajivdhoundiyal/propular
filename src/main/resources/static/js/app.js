@@ -16,6 +16,28 @@ function formatProjectId() {
 
 };
 
+app.factory('applicationContext', function() {
+	var data = {
+		project : {},
+		propertyGroup : {}
+	};
+
+	return {
+		getProject : function() {
+			return data.project;
+		},
+		setProject : function(indata) {
+			data.project = indata;
+		},
+		getPropertyGroup : function() {
+			return data.propertyGroup;
+		},
+		setPropertyGroup : function(indata) {
+			data.propertyGroup = indata;
+		}
+	};
+});
+
 app.factory('notificationService', function($rootScope) {
     var notificationService = {
     	message: '',
@@ -71,7 +93,7 @@ app.directive('notification', ['$interval', function ($interval) {
     };
 }]); 
 
-app.controller('projectController', function($rootScope, $scope, $http, notificationService) {
+app.controller('projectController', function($rootScope, $scope, $http, notificationService, applicationContext) {
 	
 	$scope.project = {
 		name : "",
@@ -140,30 +162,28 @@ app.controller('projectController', function($rootScope, $scope, $http, notifica
 	};
 
 	$scope.viewProjectDetail = function(project) {
+		applicationContext.setProject(project);
 		$scope.projectDetail = project;
-		$http({
-			method : "GET",
-			url : "/"+project.projectId+"/propertygroup"
-		}).then(function mySucces(response) {
-			$rootScope.$broadcast("handleProjectDetailBroadcast", response.data);
-		}, function myError(response) {
-			$scope.error = response.statusText;
-		})
 	};
 
 });
 
-app.controller('propertyGroupController', function($rootScope, $scope, $http, notificationService) {
-	$scope.propertyGroup = {
+app.controller('propertyGroupController', function($rootScope, $scope, $http, notificationService, applicationContext) {
+	/*$scope.propertyGroup = {
 		propertyGroupName : "",
 		propertyGroupDescription : "",
 		properties : []
-	};
+	};*/
 	
 	$scope.property = {
 		key : "",
 		value : ""
 	};
+	
+	$scope.selectedProperty = {
+			environment: "",
+			properties: []
+	}
 
 	$scope.groupsToDelete = [];
 	
@@ -171,55 +191,77 @@ app.controller('propertyGroupController', function($rootScope, $scope, $http, no
 	
 	$scope.environmentDropValue;
 	
-	$scope.$on("handleProjectDetailBroadcast", function(event, projectGroup){
-		$scope.propertyGroup = projectGroup;
-		$scope.environmentProperty = projectGroup.envProperties;
-
-		if($scope.environmentProperty == null) {
-				$scope.environmentProperty = {
-					environment: "",
-					envProperties: []
-				};
-		}
-	});
+	$scope.viewProperties = function(group) {
+		$scope.propertyGroup = group;
+		applicationContext.setPropertyGroup(group);
+	}
 	
-	$scope.$on("handleProjectGroupBroadcast", function(event, projectGroup){
-		$scope.propertyGroup = projectGroup;
-	});
-	
-	$scope.viewProperties = function(propertyGroup) {
-		$rootScope.$broadcast("handleProjectGroupBroadcast", propertyGroup);
-		//$scope.properties = $scope.propertyGroup.properties;
-		/*$http({
+	$('#collapseProjectDetails').on('show.bs.collapse', function() {
+		var project = applicationContext.getProject();
+		
+		$http({
 			method : "GET",
-			url : "/"+project.projectId+"/propertygroup"
+			url : "/"+applicationContext.getProject().projectId+"/propertygroup"
 		}).then(function mySucces(response) {
-			$rootScope.$broadcast("handleProjectDetailBroadcast", response.data);
+			$scope.propertyGroups = response.data;
+			applicationContext.setPropertyGroup(response.data);
+
+			if($scope.selectedProperty == null) {
+					$scope.selectedProperty = {
+						properties: []
+					};
+			}
 		}, function myError(response) {
 			$scope.error = response.statusText;
-		});*/
-	};
+		})
+
+	});
+
+	$scope.adding = function() {
+		$scope.propertyGroup = {
+			propertyGroupName : "",
+			propertyGroupDescription : "",
+			envProperties : []
+		};
+		applicationContext.setPropertyGroup($scope.propertyGroup);
+	}
 	
 	$('#collapseProjectProperty').on('show.bs.collapse', function() {
-    	$http({
-			method : "GET",
-			url : $scope.propertyGroup.propertyGroupId + "/properties"
-		}).then(function mySucces(response) {
-			$scope.environmentProperties = response.data;
-		}, function myError(response) {
-			$scope.error = response.statusText;
-		});
     	
     	$http({
 			method : "GET",
 			url : "/environment"
 		}).then(function mySucces(response) {
 			$scope.environments = response.data;
+			$scope.environmentDropValue = response.data[0].name;
+			
+			if(applicationContext.getPropertyGroup() != null &&
+					(applicationContext.getPropertyGroup().propertyGroupId !== undefined)) {
+				$http({
+					method : "GET",
+					url : applicationContext.getPropertyGroup().propertyGroupId + "/properties"
+				}).then(function mySucces(response) {
+					$scope.propertyGroup = applicationContext.getPropertyGroup();
+					$scope.propertyGroup.envProperties = response.data
+					$scope.environmentProperties = response.data;
+					$scope.environmentChange($scope.environmentDropValue);
+				}, function myError(response) {
+					$scope.error = response.statusText;
+				});
+			}
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		});
+    	
+
 	});
 	
+	$('#collapseProjectProperty').on('hide.bs.collapse', function() {
+		$scope.selectedProperty = null;
+		$scope.environmentProperties = null;
+		$scope.propertyGroup = null;
+	});
+
 	$scope.addGroupForDelete = function(group) {
 		var index = $scope.groupsToDelete.indexOf(group);
 		if (index > -1) {
@@ -250,7 +292,7 @@ app.controller('propertyGroupController', function($rootScope, $scope, $http, no
 	}
 	
 	$scope.addAllPropertyDelete = function(propertyGroup, allPropDelCheck) {
-		angular.forEach(propertyGroup.properties, function (item) {
+		angular.forEach(propertyGroup.envProperties, function (item) {
             item.checked = allPropDelCheck;
             $scope.addPropForDelete(item);
         });
@@ -260,37 +302,82 @@ app.controller('propertyGroupController', function($rootScope, $scope, $http, no
 		}
 	}
 	
+	$scope.environmentChange = function(value) {
+		var match = false;
+		angular.forEach($scope.environmentProperties, function (item) {
+			if(item.environment === value) {
+				$scope.selectedProperty = item;
+				match = true;
+			}
+        });
+		if(!match) {
+			$scope.selectedProperty={
+					environment: "",
+					properties: []
+			};
+		}
+	}
+	
 	$scope.addProperty = function() {
 		
-		if($scope.environmentProperty.environment != null) {
-			$scope.environmentProperty.environment = $scope.environmentDropValue;
-			var index = $scope.environmentProperty[environment].envProperties.indexOf($scope.property);
-			if (index > -1) {
-				alert('Key already exists.');
-			} else {
-				$scope.environmentProperty[environment].envProperties.push($scope.property);
+		if($scope.environmentDropValue != null) {
+			if($scope.environmentDropValue !== null || $scope.environmentDropValue !== 'Environment') {
+				if($scope.propertyGroup.envProperties === "" || $scope.propertyGroup.envProperties === null) {
+					$scope.propertyGroup.envProperties = [];
+				}
+				
+				$scope.selectedProperty.environment = $scope.environmentDropValue;
+				var index = $scope.selectedProperty.properties.indexOf($scope.property);
+				if (index < 0) {
+					$scope.selectedProperty.properties.push($scope.property);
+				}
+				
+				var index = $scope.propertyGroup.envProperties.indexOf($scope.selectedProperty);
+				if (index < 0) {
+					$scope.propertyGroup.envProperties.push($scope.selectedProperty);
+				}
 			}
 		}
-
 		
 		$scope.property = {};
 	};
 
-	$scope.savePropertyGroup = function(projectDetail) {
-		if (projectDetail.propertyGroup == ''
-				|| projectDetail.propertyGroup == undefined
-				|| projectDetail.propertyGroup == null) {
-			projectDetail.propertyGroup = [];
+	$scope.saveEnvirontmentProperties = function() {
+		
+		if($scope.environmentProperties != null) {
+			$http({
+				method : "POST",
+				url : $scope.propertyGroup.propertyGroupId + "/properties",
+				data : $scope.propertyGroup.envProperties
+			}).then(function mySucces(response) {
+				$scope.propertyGroup.envProperties = response.data;
+			}, function myError(response) {
+				$scope.error = response.statusText;
+			})
 		}
-		projectDetail.propertyGroup.push($scope.propertyGroup);
+		
+		$scope.environmentProperties = null;
+		$scope.selectedProperty = null;
+		$scope.property = {};
+	};
+	
+	$scope.savePropertyGroup = function() {
 
+		var project = applicationContext.getProject();
+		
 		$http({
 			method : "POST",
-			url : "/project",
-			data : projectDetail
+			url : project.projectId + "/propertygroup",
+			data : $scope.propertyGroup
 		}).then(function mySucces(response) {
-			$scope.projects = response.data;
-			//$scope.$digest();
+			$scope.propertyGroups = response.data;
+			applicationContext.setPropertyGroup(response.data);
+
+			if($scope.selectedProperty == null) {
+					$scope.selectedProperty = {
+						properties: []
+					};
+			}
 		}, function myError(response) {
 			$scope.error = response.statusText;
 		})
